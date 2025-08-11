@@ -1,0 +1,13 @@
+chromaDB
+dotenv
+langchain_community
+langchain_chroma
+langchain_text_splitters
+python-docx 
+pymupdf 
+requests 
+tqdm
+ollama
+"unstructured[all-docs]"
+pdfminer.six
+pi_heif

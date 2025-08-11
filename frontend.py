@@ -3,6 +3,7 @@ import os
 from langchain_community.document_loaders import Docx2txtLoader, PyPDFLoader
 from io import StringIO
 import subprocess
+import json
 
 def getTextPdf(filename):
     loader = PyPDFLoader(file_path=filename)
@@ -31,3 +32,12 @@ if st.button("Upload legal documents here"):
                 f.write(file.getbuffer())
         st.write("All files processed successfully ✅")
         subprocess.run(['python','generate-answer.py'])
+
+with open("output.json", "r", encoding="utf-8") as f:
+    data = json.load(f)
+
+# Pretty-print JSON in a Streamlit text area
+# st.text_area("Analysis Output", json.dumps(data, indent=4), height=400)
+
+# Or display it as an interactive JSON viewer (Streamlit 1.38+)
+st.json(data)

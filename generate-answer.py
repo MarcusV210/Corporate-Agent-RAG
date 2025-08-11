@@ -65,54 +65,43 @@ for chunk in query_chunks:
 
 context = "\n\n".join([doc.page_content for doc in all_results])
 
-# print(f"UserQuery: {userQuery}")
-# print(f"Count in the database is : {vectorDB._collection.count()}")
 # print(f"Context : {context}")
+print(f"UserQuery: {userQuery}")
+print(f"Count in the database is : {vectorDB._collection.count()}")
 
 prompt = f"""
-You are a legal document reviewer AI. Your task is to:
+You are a legal document reviewer AI.
 
-1. **Analyze uploaded legal documents** against a known checklist and reference data.
-2. **Identify the process**.
-3. **Check against the required document list** for that process.
-4. **Identify missing documents**.
-5. **Find issues** in the content (incorrect clauses, missing information, wrong jurisdiction, etc.).
-6. **Output both:**
-   - A JSON object in **exactly** the format shown below (no extra text outside the JSON).
-   - A `.docx` version of the input files where issues are **highlighted**.
+Analyze the input legal document and respond **only** in the following JSON format:
 
-**JSON format (mandatory):**
 {{
-    "process": "<detected process>",
-    "documents_uploaded": {n_uploaded_docs}, <- do NOT change this value.
-    "required_documents": <int>,
-    "missing_document": "<string or list>",
+    "process": "<detected process, e.g. 'Employment Contract Review'>",
+    "documents_uploaded": {n_uploaded_docs}, <- DO NOT CHANGE
+    "required_documents": <number required>,
+    "missing_document": ["<doc name>", ...] or [],
     "issues_found": [
         {{
-            "document": "<document name>",
+            "document": "<filename>",
             "section": "<section or clause>",
-            "issue": "<short issue description>",
+            "issue": "<short description>",
             "severity": "<High|Medium|Low>",
-            "suggestion": "<fix suggestion>"
+            "suggestion": "<how to fix>"
         }}
     ]
 }}
+The list of issues_found can only be from the documents uploaded and not from the contextual documents.
+Make sure the document name in issues_found is the same as the uploaded documents.
+context : {context}
+Question : {userQuery}
 
-
-**Reference context** (use this for checking correctness and completeness):
-{context}
-
-**User query / task:**
-{userQuery}
-
-**Important rules:**
-- The JSON must be valid and parsable.
-- If no issues are found, "issues_found" should be an empty list.
-- For `.docx` output, highlight the problematic sections in yellow and insert comments where relevant.
-- Do not add any explanation outside the JSON.
-- YOU HAVE TO STICK TO THE FORMAT GIVEN.
+Rules:
+- No explanations outside the JSON.
+- If nothing is missing, "missing_document" must be [].
+- If no issues are found, "issues_found" must be [].
+- All string values must be valid JSON strings.
 """
-# print(prompt, '\n\n')
+
+
 
 
 response = ollama.chat(
